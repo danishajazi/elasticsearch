@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model List<ProductDetails>
+
+
+<div class="text-center">
+    <h1 class="display-6">Welcome</h1>
+    @* <hr />*@
+</div>
+
+<form asp-controller="Home" asp-action="Index" method="post">
+
+    <input type="text" name="searchKeyword" />
+    <input type="submit" value="Search" class="btn btn-outline-info" />
+    <input type="submit" value="Clear" class="btn btn-outline-warning disabled" />
+
+</form>
+<hr />
+
+<div class="panel panel-default">
+    <table class="table table-striped">
+        <tr>
+            @*<th width="2%"> Id </th>*@
+            <th width="20%"> Product Name </th>
+            <th width="7%"> Price </th>
+            <th width="35%"> Description</th>
+            <th width="14%"> Colors</th>
+            <th width="14%"> Tags</th>
+            <th> </th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @*<td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>*@
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+
+                <td>
+                    @foreach (var color in item.Colors)
+                    {
+                        var colors = color + " ";
+                        @colors
+                        ;
+                    }
+                </td>
+
+                <td>
+                    @foreach (var tag in item.Tags)
+                    {
+                        var tags = tag + " ";
+                        @tags
+                        ;
+                    }
+                </td>
+                <td>
+                    <a asp-action="EditProduct" asp-route-id="@item.Id" title="Edit" class="btn btn-warning">
+                        <span class="fas fa-edit"></span>
+                    </a>
+
+                    <a asp-action="Details" asp-route-id="@item.Id" title="Details" class="btn btn-primary disabled">
+                        <span class="fas fa-search"></span>
+                    </a>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
