@@ -1,4 +1,5 @@
 ﻿using Elasticsearch.WebApp.Data;
+using Elasticsearch.WebApp.ElasticSearch;
 using Elasticsearch.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
@@ -9,9 +10,9 @@ namespace Elasticsearch.WebApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ElasticClient _client;
+        private readonly IElasticClient _client;
 
-        public HomeController(ILogger<HomeController> logger, ElasticClient client)
+        public HomeController(ILogger<HomeController> logger, IElasticClient client)
         {
             _logger = logger;
             _client = client;
@@ -19,14 +20,16 @@ namespace Elasticsearch.WebApp.Controllers
 
         public IActionResult Index()
         {
-            ISearchResponse<ProductDetails> results = _client.Search<ProductDetails>(s => s
-                                .Query(q => q
-                                    .MatchAll()
-                                ));
+            //ISearchResponse<ProductDetails> results = _client.Search<ProductDetails>(s => s
+            //                    .Query(q => q
+            //                        .MatchAll()
+            //                    ));
 
-            List<ProductDetails> products = results.Documents.ToList();
+            IEnumerable<ProductDetails> productDetails = new ElasticSearchHelper(_client).GetAll<ProductDetails>();
 
-            return View(products);
+            //List<ProductDetails> products = results.Documents.ToList();
+
+            return View(productDetails);
         }
 
         [HttpPost]

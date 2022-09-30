@@ -5,7 +5,7 @@ namespace Elasticsearch.WebApp.ElasticSearch
 {
     public class ElasticSearchClient
     {
-        public static ElasticClient GetElasticSearchClient()
+        public static IElasticClient GetElasticSearchClient()
         {
             var nodes = new Uri[]
              {

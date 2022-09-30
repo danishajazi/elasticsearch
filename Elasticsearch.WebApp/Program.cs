@@ -1,7 +1,9 @@
 using Elasticsearch.WebApp.ElasticSearch;
+using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IElasticClient, ElasticClient>();
 builder.Services.AddSingleton(ElasticSearchClient.GetElasticSearchClient());
 
 // Add services to the container.
