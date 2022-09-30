@@ -1,19 +1,8 @@
-using Elasticsearch.Net;
-using Nest;
+using Elasticsearch.WebApp.ElasticSearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var nodes = new Uri[]
-            {
-                new Uri("http://localhost:9200/"),
-            };
-
-var connectionPool = new StaticConnectionPool(nodes);
-var connectionSettings = new ConnectionSettings(connectionPool).DisableDirectStreaming();
-connectionSettings.BasicAuthentication("elastic", "b=Ey5mn4Vw3Hwp3o1t4i");
-var elasticClient = new ElasticClient(connectionSettings.DefaultIndex("productdetails"));
-
-builder.Services.AddSingleton(elasticClient);
+builder.Services.AddSingleton(ElasticSearchClient.GetElasticSearchClient());
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
