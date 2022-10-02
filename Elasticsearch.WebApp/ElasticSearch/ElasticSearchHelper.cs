@@ -18,6 +18,17 @@ namespace Elasticsearch.WebApp.ElasticSearch
            return (int)_client.Count<T>().Count;
         }
 
+        public int GetCountBySearchKeyword<T>(string searchKeyword) where T : class
+        {
+            return (int)_client.Count<T>(c => c
+                                        .Query(q => q
+                                        .QueryString(qs => qs
+                                        .AnalyzeWildcard()
+                                            .Query("*" + searchKeyword.ToLower() + "*")
+                                            ))).Count;
+
+        }
+
         public T GetById<T>(string id) where T : class
         {
             var result = _client.Get<T>(id).Source;

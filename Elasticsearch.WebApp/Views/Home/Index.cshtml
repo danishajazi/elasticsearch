@@ -18,16 +18,22 @@
 
 <form asp-controller="Home" asp-action="Index" method="post">
 
-    <input type="text" name="searchKeyword" id="searchKeyword" value="@Model.SearchKeyword" />
+    <input type="text" name="searchKeyword" id="searchKeyword" value="@Model.SearchKeyword" required/>
     <input type="submit" value="Search" class="btn btn-outline-info" />
     <input type="submit" onclick="javascript:return ClearSearch();" value="Clear" class="btn btn-outline-warning" />
-    <hr />
+    
     @* </form>
 
     <form asp-controller="Home" asp-action="Index" method="get">*@
 
 
     <div class="panel panel-default">
+        
+            @if (Model.Product.Count() == 0)
+            {
+                <div><h5>Result Not Found for entered word</h5></div>
+            }
+        <hr />
         <table class="table table-striped">
             <tr>
                 @*<th width="2%"> Id </th>*@
@@ -38,6 +44,7 @@
                 <th width="14%"> Tags</th>
                 <th> </th>
             </tr>
+            
             @foreach (var item in Model.Product)
             {
                 <tr>
@@ -84,8 +91,8 @@
             }
         </table>
 
-
         <table class="PagingTableDesign">
+
             <tr>
                 @for (int i = 1; i <= Model.PageCount; i++)
                 {
@@ -114,9 +121,16 @@
         document.forms[0].submit();
     }
 
-        function ClearSearch() {
-        debugger;
-        document.getElementById("searchKeyword").value = "";
+    //function PagerNextClick() {
+    //    debugger;
+    //    var value = document.getElementById("pageIndex").value;
+    //    document.getElementById("pageIndex").value = 1 + parseInt(value);
+    //    document.forms[0].submit();
+    //}
 
+    function ClearSearch() {
+        debugger;
+        document.getElementById("searchKeyword").value = " ";
+        document.getElementById("pageIndex").value = 1;
     }
 </script>

@@ -33,16 +33,26 @@ namespace Elasticsearch.WebApp.Controllers
         public IActionResult Index(string searchKeyword, int pageIndex = 1)
         {
             var skip = (pageIndex - 1) * results.PageSize;
+            int totalResultFound;
+            
 
             if (string.IsNullOrEmpty(searchKeyword))
+            {
                 results.Product = _elasticHelper.GetAll<ProductDetails>(skip, results.PageSize);
+                totalResultFound = _elasticHelper.GetCount<ProductDetails>();
+            }
             else
+            {
+                searchKeyword = searchKeyword.Trim();
                 results.Product = _elasticHelper.GetByKeywordInMultipleFields<ProductDetails>(searchKeyword, skip, results.PageSize);
+                totalResultFound = _elasticHelper.GetCountBySearchKeyword<ProductDetails>(searchKeyword);
+            }
 
-            double pageCount = (double)(_elasticHelper.GetCount<ProductDetails>() / Convert.ToDecimal(results.PageSize));
+            double pageCount = (double)(totalResultFound / Convert.ToDecimal(results.PageSize));
             results.PageCount = (int)Math.Ceiling(pageCount);
 
             results.PageIndex = pageIndex;
+
             results.SearchKeyword = searchKeyword;
 
             return View(results);
