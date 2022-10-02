@@ -11,57 +11,41 @@ namespace Elasticsearch.WebApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IElasticClient _client;
+        private readonly ElasticSearchHelper _elasticHelper;
+        private Products results = new Products();
 
         public HomeController(ILogger<HomeController> logger, IElasticClient client)
         {
             _logger = logger;
             _client = client;
+            _elasticHelper = new ElasticSearchHelper(client);
         }
 
         public IActionResult Index()
         {
-            //ISearchResponse<ProductDetails> results = _client.Search<ProductDetails>(s => s
-            //                    .Query(q => q
-            //                        .MatchAll()
-            //                    ));
-
-            IEnumerable<ProductDetails> productDetails = new ElasticSearchHelper(_client).GetAll<ProductDetails>();
-
-            //List<ProductDetails> products = results.Documents.ToList();
-
-            return View(productDetails);
+            results.Product = _elasticHelper.GetAll<ProductDetails>(0, results.PageSize);
+            double pageCount = (double)(_elasticHelper.GetCount<ProductDetails>() / Convert.ToDecimal(results.PageSize));
+            results.PageCount = (int)Math.Ceiling(pageCount);
+            return View(results);
         }
 
         [HttpPost]
-        public IActionResult Index(string searchKeyword)
+        public IActionResult Index(string searchKeyword, int pageIndex = 1)
         {
-            ISearchResponse<ProductDetails> results;
+            var skip = (pageIndex - 1) * results.PageSize;
 
             if (string.IsNullOrEmpty(searchKeyword))
-            {
-                results = _client.Search<ProductDetails>(s => s
-                                .Query(q => q
-                                    .MatchAll()
-                                ));
-            }
+                results.Product = _elasticHelper.GetAll<ProductDetails>(skip, results.PageSize);
             else
-            {
-                results = _client.Search<ProductDetails>(s => s.Source()
-                                    .Query(q => q
-                                    .QueryString(qs => qs
-                                    .AnalyzeWildcard()
-                                       .Query("*" + searchKeyword.ToLower() + "*")
-                                       .Fields(fs => fs
-                                           .Fields(f1 => f1.ProductName,
-                                                   f2 => f2.Description,
-                                                   f3 => f3.Tags,
-                                                   f4 => f4.Colors
-                                                   )
-                                       )
-                                       )));
-            }
-            List<ProductDetails> products = results.Documents.ToList();
-            return View(products);
+                results.Product = _elasticHelper.GetByKeywordInMultipleFields<ProductDetails>(searchKeyword, skip, results.PageSize);
+
+            double pageCount = (double)(_elasticHelper.GetCount<ProductDetails>() / Convert.ToDecimal(results.PageSize));
+            results.PageCount = (int)Math.Ceiling(pageCount);
+
+            results.PageIndex = pageIndex;
+            results.SearchKeyword = searchKeyword;
+
+            return View(results);
         }
 
         public IActionResult AddProduct()
@@ -78,10 +62,8 @@ namespace Elasticsearch.WebApp.Controllers
 
         public IActionResult EditProduct(string id)
         {
-            var results = _client.Search<ProductDetails>(s => s
-                                .Query(q => q
-                                    .MatchAll()
-                                )).Documents.Where(w => w.Id == Guid.Parse(id)).FirstOrDefault();
+
+            var results = _elasticHelper.GetById<ProductDetails>(id);
 
             var colors = MasterData.GetColors();
             var tags = MasterData.GetTags();
@@ -110,7 +92,7 @@ namespace Elasticsearch.WebApp.Controllers
 
             var productDetails = new ProductVM
             {
-                ProductId= results.Id,
+                ProductId = results.Id,
                 ProductName = results.ProductName,
                 Price = results.Price,
                 Description = results.Description,
