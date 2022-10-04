@@ -2,117 +2,122 @@
     ViewData["Title"] = "Home Page";
 }
 @model Products
-
 <style>
     .PagingTableDesign td {
         width: 15px;
         border-collapse: collapse;
     }
-
 </style>
 
 <div class="text-center">
     <h1 class="display-6">Welcome</h1>
     @* <hr />*@
 </div>
-
-<form asp-controller="Home" asp-action="Index" method="post">
-
-    <input type="text" name="searchKeyword" id="searchKeyword" value="@Model.SearchKeyword" required/>
-    <input type="submit" value="Search" class="btn btn-outline-info" />
-    <input type="submit" onclick="javascript:return ClearSearch();" value="Clear" class="btn btn-outline-warning" />
-    
-    @* </form>
-
-    <form asp-controller="Home" asp-action="Index" method="get">*@
-
-
-    <div class="panel panel-default">
-        
-            @if (Model.Product.Count() == 0)
-            {
-                <div><h5>Result Not Found for entered word</h5></div>
-            }
-        <hr />
-        <table class="table table-striped">
-            <tr>
-                @*<th width="2%"> Id </th>*@
-                <th width="20%"> Product Name </th>
-                <th width="7%"> Price </th>
-                <th width="33%"> Description</th>
-                <th width="14%"> Colors</th>
-                <th width="14%"> Tags</th>
-                <th> </th>
-            </tr>
-            
-            @foreach (var item in Model.Product)
-            {
-                <tr>
-                    @*<td>
-                @Html.DisplayFor(modelItem => item.Id)
-                </td>*@
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ProductName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Price)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Description)
-                    </td>
-
-                    <td>
-                        @foreach (var color in item.Colors)
-                        {
-                            var colors = color + " ";
-                            @colors
-                            ;
-                        }
-                    </td>
-
-                    <td>
-                        @foreach (var tag in item.Tags)
-                        {
-                            var tags = tag + " ";
-                            @tags
-                            ;
-                        }
-                    </td>
-                    <td>
-                        <a asp-action="EditProduct" asp-route-id="@item.Id" title="Edit" class="btn btn-warning">
-                            <span class="fas fa-edit"></span>
-                        </a>
-
-                        <a asp-action="Details" asp-route-id="@item.Id" title="Details" class="btn btn-primary disabled">
-                            <span class="fas fa-search"></span>
-                        </a>
-                    </td>
-                </tr>
-            }
-        </table>
-
-        <table class="PagingTableDesign">
-
-            <tr>
-                @for (int i = 1; i <= Model.PageCount; i++)
-                {
-                    <td>
-                        @if (i != Model.PageIndex)
-                        {
-                            <a href="javascript:PagerClick(@i);">@i</a>
-                        }
-                        else
-                        {
-                            <span>@i</span>
-                            <input type="hidden" id="pageIndex" name="pageIndex" value="@i" />
-                        }
-                    </td>
-                }
-            </tr>
-        </table>
-
+<div style="overflow: hidden;">
+    <div style="float:right;">
+        <input  class="btn btn-outline-info" value="Export to Excel" onclick="location.href='@Url.Action("ExportToExcel", "Home")'" />
     </div>
-</form>
+    <div>
+        <form asp-controller="Home" asp-action="Index" method="post">
+
+            <input type="text" name="searchKeyword" id="searchKeyword" value="@Model.SearchKeyword" required />
+            <input type="submit" value="Search" class="btn btn-outline-info" />
+            <input type="submit" onclick="javascript:return ClearSearch();" value="Clear" class="btn btn-outline-warning" />
+
+            @* </form>
+
+            <form asp-controller="Home" asp-action="Index" method="get">*@
+
+
+            <div class="panel panel-default">
+
+                @if (Model.Product.Count() == 0)
+                {
+                    <div><h5>Result Not Found for entered word</h5></div>
+                }
+                <hr />
+                <table class="table table-striped">
+                    <tr>
+                        @*<th width="2%"> Id </th>*@
+                        <th width="20%"> Product Name </th>
+                        <th width="7%"> Price </th>
+                        <th width="33%"> Description</th>
+                        <th width="14%"> Colors</th>
+                        <th width="14%"> Tags</th>
+                        <th> </th>
+                    </tr>
+
+                    @foreach (var item in Model.Product)
+                    {
+                        <tr>
+                            @*<td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                        </td>*@
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ProductName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Price)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+
+                            <td>
+                                @foreach (var color in item.Colors)
+                                {
+                                    var colors = color + " ";
+                                    @colors
+                                    ;
+                                }
+                            </td>
+
+                            <td>
+                                @foreach (var tag in item.Tags)
+                                {
+                                    var tags = tag + " ";
+                                    @tags
+                                    ;
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="EditProduct" asp-route-id="@item.Id" title="Edit" class="btn btn-warning">
+                                    <span class="fas fa-edit"></span>
+                                </a>
+
+                                <a asp-action="Details" asp-route-id="@item.Id" title="Details" class="btn btn-primary disabled">
+                                    <span class="fas fa-search"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+
+                <table class="PagingTableDesign">
+
+                    <tr>
+                        @for (int i = 1; i <= Model.PageCount; i++)
+                        {
+                            <td>
+                                @if (i != Model.PageIndex)
+                                {
+                                    <a href="javascript:PagerClick(@i);">@i</a>
+                                }
+                                else
+                                {
+                                    <span>@i</span>
+                                    <input type="hidden" id="pageIndex" name="pageIndex" value="@i" />
+                                }
+                            </td>
+                        }
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 
 <script type="text/javascript">
     function PagerClick(index) {

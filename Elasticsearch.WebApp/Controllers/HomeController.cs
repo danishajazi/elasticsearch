@@ -3,6 +3,10 @@ using Elasticsearch.WebApp.ElasticSearch;
 using Elasticsearch.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
+using Newtonsoft.Json;
+using OfficeOpenXml;
+using OfficeOpenXml.Table;
+using System.Data;
 using System.Diagnostics;
 
 namespace Elasticsearch.WebApp.Controllers
@@ -57,6 +61,21 @@ namespace Elasticsearch.WebApp.Controllers
 
             return View(results);
         }
+
+        public IActionResult ExportToExcel()
+        {
+            var exportbytes = ExporttoExcel(_elasticHelper.GetAll<ProductDetails>());
+            return File(exportbytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Report.xlsx");
+        }
+
+        private byte[] ExporttoExcel<T>(IEnumerable<T> data)
+        {
+            using ExcelPackage pack = new ExcelPackage();
+            ExcelWorksheet ws = pack.Workbook.Worksheets.Add("Sheet1");
+            ws.Cells.LoadFromCollection(data, true, TableStyles.Light9);
+            return pack.GetAsByteArray();
+        }
+
 
         public IActionResult AddProduct()
         {
