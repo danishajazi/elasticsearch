@@ -1,0 +1,35 @@
+﻿@model Pager
+
+<style>
+    .PagingTableDesign td {
+        width: 15px;
+        border-collapse: collapse;
+    }
+</style>
+
+<table class="PagingTableDesign">
+    <tr>
+        @for (int i = 1; i <= Model.PageCount; i++)
+        {
+            <td>
+                @if (i != Model.PageIndex)
+                {
+                    <a href="javascript:PagerClick(@i);">@i</a>
+                }
+                else
+                {
+                    <span>@i</span>
+                    <input type="hidden" id="pageIndex" name="pageIndex" value="@i" />
+                }
+            </td>
+        }
+    </tr>
+</table>
+
+<script>
+    function PagerClick(index) {
+        debugger;
+        document.getElementById("pageIndex").value = index;
+        document.forms[0].submit();
+    }
+</script>
