@@ -9,7 +9,7 @@
 
 <div style="overflow: hidden;">
     <div style="float:left;">
-        Show <select name="pageSize" asp-items="@Model.PageSizes"></select> Records
+        Show <select name="pageSize" asp-items="@Model.PageSizes" onchange = "form.submit();" ></select> Records
     </div>
     <div align="center" style="float:right;">
         <table class="PagingTableDesign">
