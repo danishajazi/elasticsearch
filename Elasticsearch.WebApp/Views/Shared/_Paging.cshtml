@@ -7,24 +7,32 @@
     }
 </style>
 
-<table class="PagingTableDesign">
-    <tr>
-        @for (int i = 1; i <= Model.PageCount; i++)
-        {
-            <td>
-                @if (i != Model.PageIndex)
+<div style="overflow: hidden;">
+    <div style="float:left;">
+        Show <select name="pageSize" asp-items="@Model.PageSizes"></select> Records
+    </div>
+    <div align="center" style="float:right;">
+        <table class="PagingTableDesign">
+            <tr>
+                @for (int i = 1; i <= Model.PageCount; i++)
                 {
-                    <a href="javascript:PagerClick(@i);">@i</a>
+                    <td>
+                        @if (i != Model.PageIndex)
+                        {
+                            <a href="javascript:PagerClick(@i);">@i</a>
+                        }
+                        else
+                        {
+                            <span>@i</span>
+                            <input type="hidden" id="pageIndex" name="pageIndex" value="@i" />
+                        }
+                    </td>
                 }
-                else
-                {
-                    <span>@i</span>
-                    <input type="hidden" id="pageIndex" name="pageIndex" value="@i" />
-                }
-            </td>
-        }
-    </tr>
-</table>
+            </tr>
+        </table>
+    </div>
+</div>
+
 
 <script>
     function PagerClick(index) {

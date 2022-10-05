@@ -34,10 +34,12 @@ namespace Elasticsearch.WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(string searchKeyword, int pageIndex = 1)
+        public IActionResult Index(string searchKeyword, int pageIndex = 1, string pageSize = "5")
         {
             var skip = (pageIndex - 1) * results.PageSize;
             int totalResultFound;
+
+            results.PageSize = int.Parse(pageSize);
             
 
             if (string.IsNullOrEmpty(searchKeyword))
@@ -58,6 +60,8 @@ namespace Elasticsearch.WebApp.Controllers
             results.PageIndex = pageIndex;
 
             results.SearchKeyword = searchKeyword;
+
+            results.PageSizes.Where(v => v.Value == pageSize).First().Selected = true;
 
             return View(results);
         }
