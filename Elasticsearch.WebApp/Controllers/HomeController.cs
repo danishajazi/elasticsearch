@@ -15,43 +15,74 @@ namespace Elasticsearch.WebApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IElasticClient _client;
-        private readonly ElasticSearchHelper _elasticHelper;
+        private readonly ElasticSearchHelper<ProductDetails> _elasticHelper;
         private Products results = new Products();
 
         public HomeController(ILogger<HomeController> logger, IElasticClient client)
         {
             _logger = logger;
             _client = client;
-            _elasticHelper = new ElasticSearchHelper(client);
+            _elasticHelper = new ElasticSearchHelper<ProductDetails>(client);
         }
 
         public IActionResult Index()
         {
-            results.Product = _elasticHelper.GetAll<ProductDetails>(0, results.PageSize);
-            double pageCount = (double)(_elasticHelper.GetCount<ProductDetails>() / Convert.ToDecimal(results.PageSize));
+            Func<SortDescriptor<ProductDetails>, IPromise<IList<ISort>>> Sorting;
+            Sorting = sort => sort.Ascending(f => f.ProductName.Suffix("keyword"));
+            results.Product = _elasticHelper.GetAll(0, results.PageSize);
+            results.Product = _elasticHelper.GetAllDataWithSorting(0, results.PageSize, Sorting);
+            double pageCount = (double)(_elasticHelper.GetCount() / Convert.ToDecimal(results.PageSize));
             results.PageCount = (int)Math.Ceiling(pageCount);
             return View(results);
         }
 
-        [HttpPost]
-        public IActionResult Index(string searchKeyword, int pageIndex = 1, string pageSize = "5")
+        //[HttpPost]
+        public IActionResult GetProduct(string searchKeyword, string sortBy, string sortOrder, int pageIndex = 1, string pageSize = "5")
         {
             var skip = (pageIndex - 1) * results.PageSize;
             int totalResultFound;
 
+
             results.PageSize = int.Parse(pageSize);
-            
+            if (sortOrder == "ASC")
+            {
+                results.SortOrder = "DESC";
+            }
+            else
+            {
+                results.SortOrder = "ASC";
+            }
+            Func<SortDescriptor<ProductDetails>, IPromise<IList<ISort>>> Sorting;
+            switch (sortBy, sortOrder)
+            {
+                case ("Price", "ASC"):
+                    Sorting = sort => sort.Ascending(f => f.Price);
+                    break;
+                case ("Price", "DESC"):
+                    Sorting = sort => sort.Descending(f => f.Price);
+                    break;
+                case ("Name", "DESC"):
+                    Sorting = sort => sort.Descending(f => f.ProductName.Suffix("keyword"));
+                    break;
+                case ("Name", "ASC"):
+                default:
+                    Sorting = sort => sort.Ascending(f => f.ProductName.Suffix("keyword"));
+                    break;
+            }
+
+            //results.SortOrder = sortOrder;
 
             if (string.IsNullOrEmpty(searchKeyword))
             {
-                results.Product = _elasticHelper.GetAll<ProductDetails>(skip, results.PageSize);
-                totalResultFound = _elasticHelper.GetCount<ProductDetails>();
+                results.Product = _elasticHelper.GetAllDataWithSorting(skip, results.PageSize, Sorting);
+                totalResultFound = _elasticHelper.GetCount();
             }
             else
             {
                 searchKeyword = searchKeyword.Trim();
-                results.Product = _elasticHelper.GetByKeywordInMultipleFields<ProductDetails>(searchKeyword, skip, results.PageSize);
-                totalResultFound = _elasticHelper.GetCountBySearchKeyword<ProductDetails>(searchKeyword);
+                //results.Product = _elasticHelper.GetByKeywordInMultipleFields(searchKeyword, skip, results.PageSize);
+                results.Product = _elasticHelper.GetByKeywordInMultipleFieldsWithSorting(searchKeyword, skip, results.PageSize, Sorting);
+                totalResultFound = _elasticHelper.GetCountBySearchKeyword(searchKeyword);
             }
 
             double pageCount = (double)(totalResultFound / Convert.ToDecimal(results.PageSize));
@@ -63,12 +94,12 @@ namespace Elasticsearch.WebApp.Controllers
 
             results.PageSizes.Where(v => v.Value == pageSize).First().Selected = true;
 
-            return View(results);
+            return View("Index", results);
         }
 
         public IActionResult ExportToExcel()
         {
-            var exportbytes = ExporttoExcel(_elasticHelper.GetAll<ProductDetails>());
+            var exportbytes = ExporttoExcel(_elasticHelper.GetAll());
             return File(exportbytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Report.xlsx");
         }
 
@@ -96,7 +127,7 @@ namespace Elasticsearch.WebApp.Controllers
         public IActionResult EditProduct(string id)
         {
 
-            var results = _elasticHelper.GetById<ProductDetails>(id);
+            var results = _elasticHelper.GetById(id);
 
             var colors = MasterData.GetColors();
             var tags = MasterData.GetTags();

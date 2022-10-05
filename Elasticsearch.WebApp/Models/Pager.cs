@@ -18,6 +18,8 @@ namespace Elasticsearch.WebApp.Models
         public int PageCount { get; set; }
         public int PageSize { get; set; } = 5;
         public List<SelectListItem> PageSizes { get; set; }
+
+        public string SortOrder { get; set; } = "ASC";
     }
 
     //public class Itemlist

@@ -12,17 +12,27 @@
     }
 </style>
 
+<div style="overflow: hidden;">
+    <div class="text-center">
+        <h1 class="display-6">Welcome</h1>
+        @* <hr />*@
+    </div>
+    <div style="float:left;">
+        <p>
+            <a asp-action="AddProduct"> Add New Product</a>
+        </p>
+    </div>
 
-<div class="text-center">
-    <h1 class="display-6">Welcome</h1>
-    @* <hr />*@
 </div>
+
+
+
 <div style="overflow: hidden;">
     <div style="float:right;">
         <input class="btn btn-outline-info" value="Export to Excel" onclick="location.href='@Url.Action("ExportToExcel", "Home")'" />
     </div>
     <div>
-        <form asp-controller="Home" asp-action="Index" method="post">
+        <form asp-controller="Home" asp-action="GetProduct" method="get">
 
             <input type="text" name="searchKeyword" id="searchKeyword" value="@Model.SearchKeyword" required class="textSearch" />
             <input type="submit" value="Search" class="btn btn-outline-info" />
@@ -43,8 +53,8 @@
                 <table class="table table-striped">
                     <tr>
                         @*<th width="2%"> Id </th>*@
-                        <th width="20%"> Product Name </th>
-                        <th width="7%"> Price </th>
+                        <th width="20%"> <a asp-controller="Home" asp-action="GetProduct" asp-route-SearchKeyword="@Model.SearchKeyword" asp-route-sortBy="Name" asp-route-sortOrder="@Model.SortOrder" asp-route-pageSize="@Model.PageSize">Name</a> </th>
+                        <th width="7%"> <a asp-controller="Home" asp-action="GetProduct" asp-route-SearchKeyword="@Model.SearchKeyword" asp-route-sortBy="Price" asp-route-sortOrder="@Model.SortOrder" asp-route-pageSize="@Model.PageSize">Price</a> </th>
                         <th width="33%"> Description</th>
                         <th width="14%"> Colors</th>
                         <th width="14%"> Tags</th>
@@ -96,7 +106,6 @@
                         </tr>
                     }
                 </table>
-
                 @Html.Partial("_Paging", Model)
 
             </div>

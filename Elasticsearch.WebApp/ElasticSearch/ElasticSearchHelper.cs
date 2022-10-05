@@ -1,10 +1,9 @@
 ﻿using Elasticsearch.WebApp.Models;
 using Nest;
-using System.Linq.Expressions;
 
 namespace Elasticsearch.WebApp.ElasticSearch
 {
-    public class ElasticSearchHelper 
+    public class ElasticSearchHelper<T> where T : class
     {
         private readonly IElasticClient _client;
 
@@ -13,12 +12,12 @@ namespace Elasticsearch.WebApp.ElasticSearch
             _client = client;
         }
 
-        public int GetCount<T>() where T : class
+        public int GetCount()
         {
-           return (int)_client.Count<T>().Count;
+            return (int)_client.Count<T>().Count;
         }
 
-        public int GetCountBySearchKeyword<T>(string searchKeyword) where T : class
+        public int GetCountBySearchKeyword(string searchKeyword)
         {
             return (int)_client.Count<T>(c => c
                                         .Query(q => q
@@ -29,7 +28,7 @@ namespace Elasticsearch.WebApp.ElasticSearch
 
         }
 
-        public T GetById<T>(string id) where T : class
+        public T GetById(string id)
         {
             var result = _client.Get<T>(id).Source;
 
@@ -50,7 +49,7 @@ namespace Elasticsearch.WebApp.ElasticSearch
             return result;
         }
 
-        public IEnumerable<T> GetAll<T>() where T : class
+        public IEnumerable<T> GetAll()
         {
             return _client.Search<T>(s => s
                                 .Query(q => q
@@ -58,7 +57,21 @@ namespace Elasticsearch.WebApp.ElasticSearch
                                 )).Documents;
         }
 
-        public IEnumerable<T> GetAll<T>(int skip, int take) where T : class
+        public IEnumerable<T> GetAllDataWithSorting(int skip, int take, 
+            Func<SortDescriptor<T>, IPromise<IList<ISort>>> sorting)
+        {
+            var results = _client.Search<T>(s => s
+                                        .Skip(skip)
+                                        .Size(take)
+                                        .Query(q => q
+                                            .MatchAll()
+                                            )
+                                            .Sort(sorting)
+                                        ).Documents;
+            return results;
+        }
+
+        public IEnumerable<T> GetAll(int skip, int take)
         {
             return _client.Search<T>(s => s
                                 .Skip(skip)
@@ -68,7 +81,20 @@ namespace Elasticsearch.WebApp.ElasticSearch
                                 )).Documents;
         }
 
-        public IEnumerable<T> GetByKeywordInMultipleFields<T>(string searchKeyword, int skip, int take) where T : class
+        public IEnumerable<T> GetByKeywordInMultipleFieldsWithSorting(string searchKeyword, int skip, int take,
+            Func<SortDescriptor<T>, IPromise<IList<ISort>>> sorting)
+        {
+            return _client.Search<T>(s => s.Source()
+                                .Skip(skip)
+                                .Size(take)
+                                .Query(q => q
+                                .QueryString(qs => qs
+                                .AnalyzeWildcard()
+                                   .Query("*" + searchKeyword.ToLower() + "*")
+                                   )).Sort(sorting)).Documents;
+        }
+
+        public IEnumerable<T> GetByKeywordInMultipleFields(string searchKeyword, int skip, int take)
         {
             return _client.Search<T>(s => s.Source()
                                 .Skip(skip)
@@ -95,7 +121,7 @@ namespace Elasticsearch.WebApp.ElasticSearch
 
         }
 
-        public IEnumerable<T> GetByKeywordInMultipleFields<T>(string searchKeyword) where T : class
+        public IEnumerable<T> GetByKeywordInMultipleFields(string searchKeyword)
         {
             return _client.Search<T>(s => s.Source()
                                 .Query(q => q

@@ -1,6 +1,6 @@
 ﻿namespace Elasticsearch.WebApp.Models
 {
-    public class ProductDetails 
+    public class ProductDetails
     {
         public Guid Id { get; set; }
         public string ProductName { get; set; }
